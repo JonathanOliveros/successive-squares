@@ -7,6 +7,8 @@
 import math
 import time
 import matplotlib.pyplot as plt
+import streamlit as st
+import pandas as pd
 
 class DecimalToBinary:
 
@@ -64,54 +66,64 @@ class successiveSquares:
             if bin_num[j] == 1: #the 1's and 0's are flags to see if the index in num_lst can be multiplied to result 
                 result *= num_lst[j]
         return result % self.m # the result is easier to reduce mod m and is congruent to original number
-        
+  
+def get_times(a, m, exp_lst, time_algo_lst, time_naive_lst):
+        for i in range(0, 10000):
+            ssq = successiveSquares(a, i, m)
+            exp_lst.append(i)
+            start_algo = time.perf_counter()
+            ssq.get_mod()
+            end_algo = time.perf_counter()
+            time_algo_lst.append(end_algo - start_algo)
+            start_naive = time.perf_counter()
+            #Throwaway variable. Ensures that it is not displayed in the web app
+            throwaway = a**i % m
+            end_naive = time.perf_counter()
+            time_naive_lst.append(end_naive - start_naive)      
 
-print('Given that a,e,m are integers then we can solve:')
-print('a^e mod m')
-a = int(input('Please enter a positive integer for a: '))
-if a < 0:
-    raise Exception("Sorry, this is negative.")
-if not type(a) is int:
-    raise TypeError("This is not an integer.")
-e = int(input('Enter a positive integer for e: '))
-if 3 < 0:
-    raise Exception("Sorry, this is a negative number.")
-if not type(e) is int:
-    raise TypeError("This is not an integer.")
-m = int(input('Enter a positive integer for m: '))
-if m < 0:
-    raise Exception("Sorry, this is a negative number.")
-if not type(m) is int:
-    raise TypeError("This is not an integer.")
-ssq = successiveSquares(a, e, m)
-start_algo = time.perf_counter()
-print('Your result is: ' + str(ssq.get_mod()))
-end_algo = time.perf_counter()
-start_naive = time.perf_counter()
-(a**e % m)
-end_naive = time.perf_counter()
-print('Using the successive squares algorithm it takes ' + str(end_algo - start_algo)
-      + ' seconds. Using the naive way it takes '
-      + str(end_naive - start_naive) + ' seconds.')
-time_algo_lst = []
-time_naive_lst = []
-exp_lst = []
-for i in range(0, 10000):
-    ssq = successiveSquares(a, i, m)
-    exp_lst.append(i)
+def main():
+    st.write(
+    """
+    ## Successive Squares
+    
+    Given that
+    """)
+    st.latex(r'''a,e,m \in \mathbb{Z}''')
+    st.write('then we can solve:')
+    st.latex("a^e \, \mod \, m")
+
+    a = st.number_input("Please enter a positive integer for a: ",min_value=0)
+
+    e = st.number_input('Enter a positive integer for e: ',min_value=1)
+
+    m = st.number_input('Enter a positive integer for m: ',min_value=2)
+
+    ssq = successiveSquares(a, e, m)
     start_algo = time.perf_counter()
-    ssq.get_mod()
     end_algo = time.perf_counter()
-    time_algo_lst.append(end_algo - start_algo)
+    st.write('Your result is: ' , str(ssq.get_mod()))
     start_naive = time.perf_counter()
-    (a**i % m)
+    #Throwaway variable. Ensures that it is not displayed in the web app
+    throwaway = a**e % m
     end_naive = time.perf_counter()
-    time_naive_lst.append(end_naive - start_naive)
-plt.plot(exp_lst, time_algo_lst, label='successive squares')
-plt.plot(exp_lst, time_naive_lst, label='naive')
-plt.xlabel('exponent')
-plt.ylabel('time(seconds)')
-plt.title("Modding using successive squares vs. naive algorithms")
-plt.legend()
-plt.show()
-plt.close()
+    st.write('Using the successive squares algorithm it takes ' , str(end_algo - start_algo)
+          + ' seconds. Using the naive way it takes '
+          + str(end_naive - start_naive) + ' seconds.')
+ 
+    if st.button('Calculate'):
+        time_algo_lst = []
+        time_naive_lst = []
+        exp_lst = []
+        get_times(a, m, exp_lst, time_algo_lst, time_naive_lst)
+        
+        fig = plt.figure()
+        plt.plot(exp_lst, time_algo_lst, label='successive squares')
+        plt.plot(exp_lst, time_naive_lst, label='naive')
+        plt.xlabel('exponent')
+        plt.ylabel('time(seconds)')
+        plt.title("Successive squares vs. naive algorithms")
+        plt.legend()
+        st.pyplot(fig)
+
+if __name__ == "__main__":
+    main()
