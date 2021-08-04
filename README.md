@@ -1,4 +1,5 @@
 # successive-squares
+![Link to interactive web app](https://share.streamlit.io/jonathanoliveros/successive-squares/successive_squares.py)
 ## Summary
 An algorithm that computes the modulus of a number
 ## What I Learned
